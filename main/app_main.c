@@ -2,6 +2,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_spi_flash.h"
+#include "rom/spi_flash.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -13,8 +14,8 @@ void readWriteTask(void *pvParameters)
 {
     srand(0);
 
-    for (uint32_t base_addr = 0x100000; 
-         base_addr < 0x200000; 
+    for (uint32_t base_addr = 0x200000; 
+         base_addr < 0x300000; 
          base_addr += SPI_FLASH_SEC_SIZE) 
     {
         vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -51,5 +52,8 @@ void readWriteTask(void *pvParameters)
 
 void app_main()
 {
+    // workaround: configure SPI flash size manually (2nd argument)
+    SPIParamCfg(0x1540ef, 4*1024*1024, 64*1024, 4096, 256, 0xffff);
+
     xTaskCreatePinnedToCore(&readWriteTask, "readWriteTask", 2048, NULL, 5, NULL, 0);
 }
